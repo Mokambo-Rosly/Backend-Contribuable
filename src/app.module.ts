@@ -4,9 +4,12 @@ import { AppService } from './app.service';
 import { InvoiceModule } from './invoice/invoice.module';
 import { TaxModule } from './tax/tax.module';
 import { PrismaModule } from './prisma/prisma.module';
+import { ScheduleModule } from '@nestjs/schedule';
 
 @Module({
-  imports: [InvoiceModule, TaxModule, PrismaModule],
+  imports: [
+    ScheduleModule.forRoot(),
+    InvoiceModule, TaxModule, PrismaModule],
   controllers: [AppController],
   providers: [AppService],
 })

@@ -9,19 +9,37 @@ export class TaxTaskService {
     private taxService: TaxService,
     private invoiceService: InvoiceService,
   ) {}
-  @Cron('* * * * * *')
-  async start() {
-    const taxList = await this.taxService.findAll({
-      where: {
-        OR: [{ nextDate: new Date(), isActif: true }],
-      },
-    });
-    for (const tax of taxList) {
-      console.log('Traitement');
-      await this.invoiceService.create(tax);
-      await this.update(tax);
-    }
-    // console.log('Delcaration de payement');
+  @Cron('*/30 * * * * *')
+  start() {
+    const isNestDate = new Date();
+    const now = new Date();
+    const thirtySecondsAgo = new Date(now.getTime() - 10000);
+    const suiteSecondsAgo = new Date(now.getTime() + 10000);
+    console.log(' de ',thirtySecondsAgo,' à :',now)
+    this.taxService
+      .findAll({
+        where: {
+          OR: [
+            {
+              // nextDate:now,
+              nextDate: {
+                gte: thirtySecondsAgo, // Date actuelle - 30 secondes
+                lte: now, // Date actuelle
+              },
+              isActif: true,
+            },
+          ],
+        },
+      })
+      .then((taxList) => {
+        for (const tax of taxList) {
+          console.log(tax);
+          console.log(isNestDate, tax.nextDate);
+          this.invoiceService.create(tax).then((data) => {
+            this.update(tax);
+          });
+        }
+      });
   }
   async update(tax: TaxFT) {
     const nextDate: Date = new Date();
