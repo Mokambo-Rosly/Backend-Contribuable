@@ -6,7 +6,7 @@ import axios from 'axios';
 export class PenalityService {
   async create(inputCreate: Prisma.PenalityCreateInput) {
     try {
-      return await axios.post(process.env.CRON_ENV, inputCreate);
+      return await axios.post(`${process.env.CRON_ENV}/penalty`, inputCreate);
     } catch (e) {}
   }
 }
