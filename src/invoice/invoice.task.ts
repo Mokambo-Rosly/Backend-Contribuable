@@ -7,7 +7,7 @@ import { PenalityService } from './penality.service';
 export class InvoiceTaskService {
   constructor(
     private penalityService: PenalityService,
-    private invoiceService: InvoiceService, // private eventService: EventEmitter2,
+    private invoiceService: InvoiceService,
   ) {}
   @Cron('* * * * * *')
   async start() {
