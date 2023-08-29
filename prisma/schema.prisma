@@ -1,0 +1,222 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Refresh {
+  id        Int      @id @default(autoincrement())
+  userAgent String
+  user      User?    @relation(fields: [userId], references: [id])
+  userId    Int?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt()
+
+  @@map("refresh")
+}
+
+model Agent {
+  id          Int        @id @default(autoincrement()) @map("id_agent")
+  folder      Folder[]
+  type        AgentType? @relation(fields: [agentTypeId], references: [id], onDelete: SetNull)
+  agentTypeId Int?
+  attachement Division?  @relation(fields: [divisionId], references: [id], onDelete: SetNull)
+  divisionId  Int?
+  createdAt   DateTime   @default(now())
+  updateAt    DateTime   @updatedAt()
+  user        User?
+  isAdmin     Boolean    @default(false)
+
+  @@map("agent")
+}
+
+model TaxPayer {
+  id        Int       @id @default(autoincrement())
+  folder    Folder[]
+  adress    String?
+  localite  String?
+  user      User?     @relation(fields: [userId], references: [id])
+  userId    Int       @unique
+  // penalty     Penalty[]
+  createdAt DateTime  @default(now())
+  updateAt  DateTime  @updatedAt()
+  // regulations Regulations[]
+  invoice   Invoice[]
+
+  @@map("contribuable")
+}
+
+model User {
+  id         Int       @id @default(autoincrement())
+  first_name String
+  last_name  String
+  phone      String    @unique
+  email      String    @unique
+  civiliter  String    @default("Monsieur")
+  image      String?
+  password   String?
+  agent      Agent?    @relation(fields: [agentId], references: [id], onDelete: Cascade)
+  taxPayer   TaxPayer?
+  createdAt  DateTime  @default(now())
+  updateAt   DateTime  @updatedAt()
+  refresh    Refresh[]
+  agentId    Int?      @unique
+
+  @@map("user")
+}
+
+model AgentType {
+  id        Int      @id @default(autoincrement())
+  libelle   String
+  agent     Agent[]
+  createdAt DateTime @default(now())
+  updateAt  DateTime @updatedAt()
+
+  @@map("type_agent")
+}
+
+model Folder {
+  id            Int       @id @default(autoincrement())
+  describe      String
+  title         String
+  dateBegin     DateTime
+  isValid       Boolean   @default(false)
+  niu           String    @unique @default(uuid())
+  numberEmploye Int
+  businessStat  Decimal
+  locativeValue Decimal
+  taxPayer      TaxPayer? @relation(fields: [taxPayerId], references: [id])
+  watch         Agent?    @relation(fields: [watchId], references: [id])
+  watchId       Int?
+  createdAt     DateTime  @default(now())
+  updateAt      DateTime  @updatedAt()
+  taxPayerId    Int?
+
+  @@map("dossier")
+}
+
+model Division {
+  id        Int      @id @default(autoincrement())
+  name      String
+  describe  String
+  agent     Agent[]
+  createdAt DateTime @default(now())
+  updateAt  DateTime @updatedAt()
+
+  @@map("division")
+}
+
+model Frequence {
+  id         Int      @id @default(autoincrement())
+  isMonth    Boolean  @default(true)
+  isYear     Boolean  @default(false)
+  recurrence Int      @default(1)
+  createdAt  DateTime @default(now())
+  updateAt   DateTime @updatedAt()
+  tax        Tax[]
+
+  @@map("frequence")
+}
+
+model Tax {
+  id          Int        @id @default(autoincrement())
+  title       String
+  describe    String
+  delay       Int
+  rate        Decimal?
+  rising      Decimal?
+  penality    Decimal?
+  nextDate    DateTime?
+  createdAt   DateTime   @default(now())
+  updateAt    DateTime   @updatedAt()
+  type        TaxType    @relation(fields: [taxTypeId], references: [id])
+  taxTypeId   Int
+  frequence   Frequence? @relation(fields: [frequenceId], references: [id])
+  frequenceId Int?
+  isActif     Boolean    @default(true)
+  invoice     Invoice[]
+
+  @@map("taxe")
+}
+
+model NotificationStore {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updateAt  DateTime @updatedAt()
+  entity    String?
+  userId    Int?
+
+  @@map("notification")
+}
+
+model TaxType {
+  id        Int      @id @default(autoincrement())
+  libelle   String
+  createdAt DateTime @default(now())
+  updateAt  DateTime @updatedAt()
+  tax       Tax[]
+
+  @@map("type_taxe")
+}
+
+model Invoice {
+  id         Int        @id @default(autoincrement())
+  montant    Int
+  taxPayer   TaxPayer?  @relation(fields: [taxPayerId], references: [id])
+  tax        Tax?       @relation(fields: [taxId], references: [id])
+  lastDelay  DateTime   @updatedAt()
+  createdAt  DateTime   @default(now())
+  updateAt   DateTime   @updatedAt()
+  taxPayerId Int?
+  taxId      Int?
+  payment    Payment[]
+  paymentId  Int?
+  penalyte   Penality[]
+
+  @@map("facture")
+
+}
+
+model Penality {
+  id        Int       @id @default(autoincrement())
+  invoice   Invoice   @relation(fields: [invoiceId], references: [id])
+  montant   Int
+  lastDelay DateTime  @updatedAt()
+  createdAt DateTime  @default(now())
+  updateAt  DateTime  @updatedAt()
+  invoiceId Int
+  payment   Payment[]
+
+  @@map("penalite")
+}
+
+model Payment {
+  id              Int            @id @default(autoincrement())
+  credit          Decimal
+  createdAt       DateTime       @default(now())
+  updateAt        DateTime       @updatedAt()
+  PaymentMethod   PaymentMethod? @relation(fields: [paymentMethodId], references: [id])
+  paymentMethodId Int?
+  Invoice         Invoice?       @relation(fields: [invoiceId], references: [id])
+  invoiceId       Int?
+  Penalyte        Penality?      @relation(fields: [penalyteId], references: [id])
+  penalyteId      Int?
+
+  @@map("paiement")
+}
+
+model PaymentMethod {
+  id        Int       @id @default(autoincrement())
+  libelle   String
+  payment   Payment[]
+  createdAt DateTime  @default(now())
+  updateAt  DateTime  @updatedAt()
+
+  @@map("mode_paiement")
+}
