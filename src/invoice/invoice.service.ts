@@ -8,6 +8,7 @@ console.log('ici', process.env.CRON_ENV);
 export class InvoiceService {
   constructor(private prisma: PrismaService) {}
   async create(tax: TaxFT) {
+    console.log(tax);
     return await axios.post(`http://${process.env.CRON_ENV}/invoice`, tax);
   }
   findAll(where?: Prisma.InvoiceWhereInput) {
