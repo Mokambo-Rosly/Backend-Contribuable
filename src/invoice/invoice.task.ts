@@ -14,6 +14,7 @@ export class InvoiceTaskService {
     const invoiceList = await this.invoiceService.findAll({
       lastDelay: new Date(),
     });
+
     const invoicefilter = invoiceList.filter(
       (invoice) =>
         invoice.montant >

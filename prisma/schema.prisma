@@ -176,11 +176,10 @@ model Invoice {
   taxPayerId Int?
   taxId      Int?
   payment    Payment[]
-  paymentId  Int?
+  isPayed    Boolean?    @default(false)
   penalyte   Penality[]
 
   @@map("facture")
-
 }
 
 model Penality {
@@ -203,7 +202,7 @@ model Payment {
   updateAt        DateTime       @updatedAt()
   PaymentMethod   PaymentMethod? @relation(fields: [paymentMethodId], references: [id])
   paymentMethodId Int?
-  Invoice         Invoice?       @relation(fields: [invoiceId], references: [id])
+  invoice         Invoice?       @relation(fields: [invoiceId], references: [id])
   invoiceId       Int?
   Penalyte        Penality?      @relation(fields: [penalyteId], references: [id])
   penalyteId      Int?
