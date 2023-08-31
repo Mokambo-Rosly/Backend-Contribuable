@@ -29,7 +29,22 @@
 ## Installation
 
 ```bash
+$ npm install -g dotenv-cli
+```
+
+```bash
 $ npm install
+```
+## DB config install
+
+```bash
+# development
+$ npx prisma generate
+```
+
+```bash
+# production mode
+$ npm  run generate:prod
 ```
 
 ## Running the app

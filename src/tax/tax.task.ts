@@ -14,8 +14,7 @@ export class TaxTaskService {
     const isNestDate = new Date();
     const now = new Date();
     const thirtySecondsAgo = new Date(now.getTime() - 10000);
-    const suiteSecondsAgo = new Date(now.getTime() + 10000);
-    console.log(' de ',thirtySecondsAgo,' à :',now)
+    console.log(' de ', thirtySecondsAgo, ' à :', now);
     this.taxService
       .findAll({
         where: {
@@ -33,11 +32,10 @@ export class TaxTaskService {
       })
       .then((taxList) => {
         for (const tax of taxList) {
-          console.log(tax);
+          console.log('tax recupperer', tax.id);
           console.log(isNestDate, tax.nextDate);
-          this.invoiceService.create(tax).then((data) => {
-            this.update(tax);
-          });
+          this.invoiceService.create(tax);
+          this.update(tax);
         }
       });
   }
